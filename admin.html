@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Aditya Tournament - Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --pu1:#3b0764;--pu2:#6d28d9;--pu3:#7c3aed;--pu4:#8b5cf6;--pu5:#a78bfa;--pu6:#c4b5fd;
+  --bg:#0a0a1a;--bg2:#0f0f24;--card:#13132e;--card2:#1a1a40;
+  --green:#22c55e;--red:#ef4444;--gold:#f59e0b;--cyan:#06b6d4;--orange:#f97316;
+  --text:#ede9fe;--text2:#a78bfa;--text3:#6b7280;--border:rgba(139,92,246,0.22);
+  --glow:0 0 24px rgba(109,40,217,0.6);--glow2:0 0 50px rgba(109,40,217,0.3);
+}
+html,body{min-height:100vh;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text)}
+body{display:flex;flex-direction:column}
+
+/* LOADING */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.spin{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--pu4);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LOGIN */
+#login-pg{display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,rgba(109,40,217,.3),transparent 60%),var(--bg)}
+.login-box{width:100%;max-width:380px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:32px 28px;box-shadow:var(--glow2)}
+.login-logo{font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;background:linear-gradient(135deg,var(--pu6),#fff,var(--pu5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:4px}
+.login-sub{text-align:center;font-size:11px;color:var(--text3);letter-spacing:1px;margin-bottom:28px;font-weight:600}
+.inp{background:rgba(139,92,246,.07);border:1px solid var(--border);border-radius:13px;padding:13px 15px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;transition:all .2s;width:100%;margin-bottom:10px}
+.inp:focus{border-color:var(--pu4);background:rgba(139,92,246,.12)}
+.inp::placeholder{color:var(--text3)}
+.btn{background:linear-gradient(135deg,var(--pu2),var(--pu3),var(--pu4));border:none;border-radius:13px;padding:14px;color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;width:100%;box-shadow:var(--glow);transition:all .2s}
+.btn:active{transform:scale(.98)}
+.btn.red{background:linear-gradient(135deg,#991b1b,var(--red))}
+.btn.green{background:linear-gradient(135deg,#15803d,var(--green))}
+.btn.orange{background:linear-gradient(135deg,#c2410c,var(--orange))}
+.btn.outline{background:none;border:1px solid var(--border);color:var(--text2);box-shadow:none}
+.btn.sm{padding:8px 16px;font-size:12px;border-radius:10px;width:auto}
+.amsg{padding:10px 13px;border-radius:11px;font-size:12px;font-weight:700;width:100%;text-align:center;margin-bottom:10px}
+.amsg.ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--green)}
+.amsg.err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+
+/* MAIN LAYOUT */
+#main-pg{display:none;min-height:100vh;flex-direction:column}
+
+/* HEADER */
+.adm-hdr{background:linear-gradient(180deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.adm-logo{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--pu5),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:8px}
+.adm-badge{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--red);font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;font-family:'Nunito',sans-serif;-webkit-text-fill-color:var(--red)}
+.logout-btn{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red);padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:6px}
+
+/* NAV TABS */
+.adm-nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 12px;gap:4px}
+.adm-nav::-webkit-scrollbar{display:none}
+.nav-tab{padding:12px 16px;font-size:12px;font-weight:800;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:6px}
+.nav-tab.on{color:var(--pu5);border-bottom-color:var(--pu4)}
+.ntbadge{background:var(--red);color:#fff;font-size:9px;padding:1px 6px;border-radius:20px;font-weight:700}
+
+/* CONTENT */
+.adm-content{flex:1;padding:20px;max-width:1000px;margin:0 auto;width:100%}
+
+/* SECTION */
+.sec{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:20px}
+.sec-t{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sec-t span{font-family:'Nunito',sans-serif;font-size:12px;color:var(--text3);font-weight:600}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center}
+.stat-v{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700}
+.stat-v.pu{color:var(--pu5)}.stat-v.gld{color:var(--gold)}.stat-v.grn{color:var(--green)}.stat-v.red{color:var(--red)}.stat-v.cy{color:var(--cyan)}
+.stat-l{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th{background:rgba(139,92,246,.1);padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:11px 14px;border-top:1px solid var(--border);font-size:13px;font-weight:600;vertical-align:middle}
+tr:hover td{background:rgba(139,92,246,.04)}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800}
+.badge.pending{background:rgba(245,158,11,.15);color:var(--gold);border:1px solid rgba(245,158,11,.3)}
+.badge.approved{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.badge.rejected{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.badge.upcoming{background:rgba(139,92,246,.18);color:var(--pu5);border:1px solid rgba(139,92,246,.3)}
+.badge.live{background:rgba(239,68,68,.18);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.badge.completed{background:rgba(120,113,108,.12);color:var(--text3);border:1px solid var(--border)}
+.act-btns{display:flex;gap:6px;flex-wrap:nowrap}
+.ibtn{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;border:none;font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.ibtn.ok{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.ibtn.ok:hover{background:rgba(34,197,94,.25)}
+.ibtn.no{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.ibtn.no:hover{background:rgba(239,68,68,.25)}
+.ibtn.pu{background:rgba(139,92,246,.15);color:var(--pu5);border:1px solid var(--border)}
+.ibtn.pu:hover{background:rgba(139,92,246,.25)}
+.ibtn.or{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3)}
+
+/* FORM GRID */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:700;color:var(--text2)}
+.finp{background:rgba(139,92,246,.07);border:1px solid var(--border);border-radius:11px;padding:11px 13px;color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;outline:none;transition:all .2s;width:100%}
+.finp:focus{border-color:var(--pu4);background:rgba(139,92,246,.12)}
+.finp::placeholder{color:var(--text3)}
+select.finp{cursor:pointer}
+textarea.finp{resize:vertical;min-height:80px}
+
+/* MODAL */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.mov.open{opacity:1;pointer-events:all}
+.modal{background:var(--card2);border-radius:24px 24px 0 0;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.mov.open .modal{transform:translateY(0)}
+.mh{width:40px;height:4px;background:rgba(139,92,246,.3);border-radius:4px;margin:0 auto 16px}
+.mt{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px}
+.mi{background:rgba(139,92,246,.07);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;width:100%;margin-bottom:10px}
+.mi:focus{border-color:var(--pu4)}
+.mi::placeholder{color:var(--text3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,60,.95);border:1px solid var(--border);border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700;z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;backdrop-filter:blur(10px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(34,197,94,.4);color:var(--green)}
+.toast.err{border-color:rgba(239,68,68,.4);color:var(--red)}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px;color:var(--text3)}
+.empty i{font-size:32px;margin-bottom:10px;display:block;opacity:.5}
+.empty p{font-size:13px;font-weight:600}
+
+/* AVATAR DISPLAY */
+.u-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--pu2),var(--pu4));display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;flex-shrink:0}
+.u-av img{width:100%;height:100%;object-fit:cover}
+
+/* SEARCH */
+.search-bar{background:rgba(139,92,246,.07);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;outline:none;width:100%;margin-bottom:14px}
+.search-bar:focus{border-color:var(--pu4)}
+.search-bar::placeholder{color:var(--text3)}
+
+/* QUICK ACTIONS */
+.qa-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px}
+.qa-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
+.qa-card:hover{border-color:var(--pu4);background:rgba(139,92,246,.08);transform:translateY(-2px)}
+.qa-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.qa-text .qa-t{font-size:13px;font-weight:800}
+.qa-text .qa-s{font-size:11px;color:var(--text3);margin-top:2px;font-weight:600}
+
+/* NOTIF BELL ANIM */
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+.blink{animation:bl 1.4s infinite}
+
+/* RESPONSIVE */
+@media(max-width:640px){.adm-content{padding:12px}}
+
+/* Room ID box */
+.room-display{background:rgba(139,92,246,.08);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--pu5);text-align:center;letter-spacing:2px;margin:8px 0}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="spin"></div>
+  <div style="font-family:'Rajdhani',sans-serif;font-size:16px;color:var(--text3)">Loading Admin Panel...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-pg" style="display:none;min-height:100vh;display:flex">
+  <div class="login-box" style="margin:auto">
+    <div class="login-logo">🎮 Aditya Tournament</div>
+    <div class="login-sub">⚡ ADMIN PANEL</div>
+    <div id="login-msg"></div>
+    <input class="inp" type="text" id="a-user" placeholder="Admin Username" autocomplete="off">
+    <input class="inp" type="password" id="a-pass" placeholder="Admin Password" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <button class="btn" onclick="doAdminLogin()"><i class="fas fa-shield-halved"></i> LOGIN AS ADMIN</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main-pg">
+
+  <!-- HEADER -->
+  <div class="adm-hdr">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="adm-logo">🎮 <span>Admin Panel</span></div>
+      <div class="adm-badge">ADMIN</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="showTab('settings')" title="Admin Profile">
+        <div id="hdr-adm-av" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--pu2),var(--pu3));border:2px solid rgba(139,92,246,.5);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;flex-shrink:0">🛡️</div>
+        <span id="hdr-adm-name" style="font-size:13px;font-weight:700;color:var(--text2)"></span>
+      </div>
+      <button class="logout-btn" onclick="doAdminLogout()"><i class="fas fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </div>
+
+  <!-- NAV TABS -->
+  <div class="adm-nav">
+    <div class="nav-tab on" onclick="showTab('dashboard')" id="tab-dashboard"><i class="fas fa-chart-line"></i> Dashboard</div>
+    <div class="nav-tab" onclick="showTab('tournaments')" id="tab-tournaments"><i class="fas fa-trophy"></i> Tournaments</div>
+    <div class="nav-tab" onclick="showTab('deposits')" id="tab-deposits"><i class="fas fa-money-bill-wave"></i> Deposits <span class="ntbadge" id="dep-cnt" style="display:none">0</span></div>
+    <div class="nav-tab" onclick="showTab('withdrawals')" id="tab-withdrawals"><i class="fas fa-wallet"></i> Withdrawals <span class="ntbadge" id="wdr-cnt" style="display:none">0</span></div>
+    <div class="nav-tab" onclick="showTab('users')" id="tab-users"><i class="fas fa-users"></i> Users</div>
+    <div class="nav-tab" onclick="showTab('settings')" id="tab-settings"><i class="fas fa-gear"></i> Settings</div>
+    <div class="nav-tab" onclick="showTab('notifications')" id="tab-notifications"><i class="fas fa-bell"></i> Broadcast</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="adm-content">
+
+    <!-- DASHBOARD -->
+    <div id="pg-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-v pu" id="s-users">0</div><div class="stat-l">👥 Total Users</div></div>
+        <div class="stat-card"><div class="stat-v gld" id="s-tours">0</div><div class="stat-l">🏆 Tournaments</div></div>
+        <div class="stat-card"><div class="stat-v grn" id="s-pending-dep">0</div><div class="stat-l">💵 Pending Deposits</div></div>
+        <div class="stat-card"><div class="stat-v red" id="s-pending-wdr">0</div><div class="stat-l">💸 Pending Withdrawals</div></div>
+        <div class="stat-card"><div class="stat-v cy" id="s-wallet">₹0</div><div class="stat-l">💰 Total Wallet Balance</div></div>
+        <div class="stat-card"><div class="stat-v pu" id="s-live">0</div><div class="stat-l">🔴 Live Tournaments</div></div>
+      </div>
+
+      <div class="qa-grid">
+        <div class="qa-card" onclick="showTab('tournaments');setTimeout(()=>openAddTour(),300)">
+          <div class="qa-ico" style="background:rgba(109,40,217,.2)">🏆</div>
+          <div class="qa-text"><div class="qa-t">Add Tournament</div><div class="qa-s">Create new tournament</div></div>
+        </div>
+        <div class="qa-card" onclick="showTab('deposits')">
+          <div class="qa-ico" style="background:rgba(34,197,94,.15)">💵</div>
+          <div class="qa-text"><div class="qa-t">Pending Deposits</div><div class="qa-s" id="qa-dep-s">Loading...</div></div>
+        </div>
+        <div class="qa-card" onclick="showTab('withdrawals')">
+          <div class="qa-ico" style="background:rgba(239,68,68,.15)">💸</div>
+          <div class="qa-text"><div class="qa-t">Pending Withdrawals</div><div class="qa-s" id="qa-wdr-s">Loading...</div></div>
+        </div>
+        <div class="qa-card" onclick="showTab('settings')">
+          <div class="qa-ico" style="background:rgba(6,182,212,.15)">⚙️</div>
+          <div class="qa-text"><div class="qa-t">App Settings</div><div class="qa-s">UPI, QR, Contact</div></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">📋 Recent Activity</div>
+        <div id="recent-activity"><div class="empty"><i class="fas fa-clock"></i><p>Loading...</p></div></div>
+      </div>
+    </div>
+
+    <!-- TOURNAMENTS -->
+    <div id="pg-tournaments" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700">🏆 Tournaments</div>
+        <button class="btn sm" onclick="openAddTour()"><i class="fas fa-plus"></i> Add New</button>
+      </div>
+      <input class="search-bar" placeholder="🔍 Search tournaments..." oninput="filterTours(this.value)" id="tour-search">
+      <div id="tours-list"></div>
+    </div>
+
+    <!-- DEPOSITS -->
+    <div id="pg-deposits" style="display:none">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px">💵 Deposit Requests</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="ibtn pu" onclick="filterDeps('all')" id="df-all" style="border-color:var(--pu4)">All</button>
+        <button class="ibtn pu" onclick="filterDeps('pending')" id="df-pending">Pending</button>
+        <button class="ibtn pu" onclick="filterDeps('approved')" id="df-approved">Approved</button>
+        <button class="ibtn pu" onclick="filterDeps('rejected')" id="df-rejected">Rejected</button>
+      </div>
+      <div class="tbl-wrap" id="dep-table-wrap">
+        <table><thead><tr><th>#</th><th>User</th><th>Amount</th><th>Txn ID</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="dep-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- WITHDRAWALS -->
+    <div id="pg-withdrawals" style="display:none">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px">💸 Withdrawal Requests</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="ibtn pu" onclick="filterWdrs('all')" id="wf-all" style="border-color:var(--pu4)">All</button>
+        <button class="ibtn pu" onclick="filterWdrs('pending')" id="wf-pending">Pending</button>
+        <button class="ibtn pu" onclick="filterWdrs('approved')" id="wf-approved">Approved</button>
+        <button class="ibtn pu" onclick="filterWdrs('rejected')" id="wf-rejected">Rejected</button>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>#</th><th>User</th><th>Amount</th><th>UPI ID</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="wdr-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div id="pg-users" style="display:none">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px">👥 Users</div>
+      <input class="search-bar" placeholder="🔍 Search by name or email..." oninput="filterUsers(this.value)" id="user-search">
+      <div class="tbl-wrap">
+        <table><thead><tr><th>#</th><th>User</th><th>Email</th><th>Wallet</th><th>Kills</th><th>Matches</th><th>Wins</th><th>Actions</th></tr></thead>
+        <tbody id="users-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="pg-settings" style="display:none">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px">⚙️ App Settings</div>
+
+      <!-- ADMIN PROFILE -->
+      <div class="sec">
+        <div class="sec-t">👤 Admin Profile</div>
+        <!-- Avatar -->
+        <div style="display:flex;align-items:center;gap:18px;margin-bottom:18px">
+          <div id="adm-av-wrap" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--pu2),var(--pu3));border:3px solid rgba(139,92,246,.5);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0;box-shadow:var(--glow)">🛡️</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text2)">Profile Photo</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="ibtn pu" onclick="document.getElementById('adm-av-file').click()"><i class="fas fa-image"></i> Gallery se Upload</button>
+              <button class="ibtn no" onclick="clearAdmAvatar()"><i class="fas fa-trash"></i> Remove</button>
+            </div>
+            <input type="file" id="adm-av-file" accept="image/*" style="display:none" onchange="handleAdmAvatar(event)">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>Admin Username</label><input class="finp" type="text" id="st-auser" placeholder="admin"></div>
+          <div class="form-group"><label>Admin Password</label><input class="finp" type="password" id="st-apass" placeholder="admin123"></div>
+          <div class="form-group full"><label>Display Name (optional)</label><input class="finp" type="text" id="st-adname" placeholder="e.g. Aditya"></div>
+          <div class="form-group full"><label>Profile Photo URL (ya upar se gallery upload karo)</label><input class="finp" type="url" id="st-adphoto" placeholder="https://..." oninput="previewAdmAv(this.value)"></div>
+        </div>
+        <button class="btn sm" style="margin-top:4px" onclick="saveAdminProfile()"><i class="fas fa-save"></i> Save Profile</button>
+      </div>
+
+      <!-- PAYMENT -->
+      <div class="sec">
+        <div class="sec-t">💳 Payment Settings</div>
+        <div class="form-grid">
+          <div class="form-group full"><label>UPI ID</label><input class="finp" type="text" id="st-upi" placeholder="yourname@upi"></div>
+        </div>
+        <!-- QR Upload -->
+        <div style="margin-top:12px;margin-bottom:12px">
+          <label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:8px">QR Code</label>
+          <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+            <div id="qr-preview-box" style="width:120px;height:120px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,.4)">
+              <i class="fas fa-qrcode" style="font-size:50px;color:#ccc"></i>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+              <button class="ibtn pu" style="width:fit-content" onclick="document.getElementById('qr-file-inp').click()"><i class="fas fa-image"></i> 📷 Gallery se QR Upload karo</button>
+              <input type="file" id="qr-file-inp" accept="image/*" style="display:none" onchange="handleQRUpload(event)">
+              <div style="font-size:11px;color:var(--text3);font-weight:600">— ya URL paste karo —</div>
+              <input class="finp" type="url" id="st-qr" placeholder="https://... QR image link" oninput="previewQR(this.value)" style="margin:0">
+            </div>
+          </div>
+        </div>
+        <button class="btn sm" style="margin-top:4px" onclick="savePayment()"><i class="fas fa-save"></i> Save Payment Info</button>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">📞 Contact Info</div>
+        <div class="form-grid">
+          <div class="form-group"><label>WhatsApp Number</label><input class="finp" type="text" id="st-wa" placeholder="919876543210"></div>
+          <div class="form-group"><label>Telegram Username</label><input class="finp" type="text" id="st-tg" placeholder="@yourtelegram"></div>
+        </div>
+        <button class="btn sm" style="margin-top:4px" onclick="saveContact()"><i class="fas fa-save"></i> Save Contact Info</button>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">📋 Terms & Conditions</div>
+        <div class="form-grid">
+          <div class="form-group full"><label>T&C Text (HTML supported)</label><textarea class="finp" id="st-tc" rows="5" placeholder="Write your terms and conditions here..."></textarea></div>
+          <div class="form-group full"><label>T&C Image URL (optional)</label><input class="finp" type="url" id="st-tcimg" placeholder="https://..."></div>
+        </div>
+        <button class="btn sm" style="margin-top:4px" onclick="saveTC()"><i class="fas fa-save"></i> Save T&C</button>
+      </div>
+    </div>
+
+    <!-- BROADCAST NOTIFICATIONS -->
+    <div id="pg-notifications" style="display:none">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px">📢 Broadcast Notification</div>
+      <div class="sec">
+        <div class="sec-t">Send to All Users</div>
+        <div class="form-group" style="margin-bottom:12px"><label>Notification Title</label><input class="finp" type="text" id="notif-title" placeholder="e.g. 🏆 New Tournament Alert!"></div>
+        <div class="form-group" style="margin-bottom:16px"><label>Message</label><textarea class="finp" id="notif-msg" rows="4" placeholder="Write your message here..."></textarea></div>
+        <button class="btn" onclick="sendBroadcast()"><i class="fas fa-paper-plane"></i> Send to All Users</button>
+      </div>
+      <div class="sec">
+        <div class="sec-t">📨 Notification History <span>(last 20)</span></div>
+        <div id="notif-history"><div class="empty"><i class="fas fa-bell"></i><p>Loading...</p></div></div>
+      </div>
+    </div>
+
+  </div><!-- /adm-content -->
+</div><!-- /main-pg -->
+
+<!-- MODALS -->
+
+<!-- ADD/EDIT TOURNAMENT -->
+<div class="mov" id="m-tour" onclick="if(event.target===this)closeM('m-tour')">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mt" id="m-tour-title">🏆 Add Tournament</div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Tournament Title *</label><input class="mi" type="text" id="t-title" placeholder="e.g. Free Fire Sunday Battle"></div>
+      <div class="form-group"><label>Game *</label>
+        <select class="mi" id="t-game">
+          <option value="Free Fire">Free Fire</option>
+          <option value="BGMI">BGMI</option>
+          <option value="PUBG">PUBG</option>
+          <option value="Call of Duty">Call of Duty</option>
+          <option value="Clash Royale">Clash Royale</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select class="mi" id="t-status">
+          <option value="upcoming">Upcoming</option>
+          <option value="live">Live</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Entry Fee (₹)</label><input class="mi" type="number" id="t-fee" placeholder="0" min="0"></div>
+      <div class="form-group"><label>Prize Pool (₹)</label><input class="mi" type="number" id="t-prize" placeholder="0" min="0"></div>
+      <div class="form-group"><label>Per Kill (₹)</label><input class="mi" type="number" id="t-kill" placeholder="0" min="0"></div>
+      <div class="form-group"><label>Max Players</label><input class="mi" type="number" id="t-maxp" placeholder="40" min="1"></div>
+      <div class="form-group"><label>Map</label><input class="mi" type="text" id="t-map" placeholder="Bermuda, Erangel..."></div>
+      <div class="form-group full"><label>Date & Time</label><input class="mi" type="datetime-local" id="t-time"></div>
+      <div class="form-group full"><label>Thumbnail URL (optional)</label><input class="mi" type="url" id="t-thumb" placeholder="https://..."></div>
+      <div class="form-group"><label>Room ID</label><input class="mi" type="text" id="t-room" placeholder="Enter Room ID"></div>
+      <div class="form-group"><label>Room Password</label><input class="mi" type="text" id="t-rpass" placeholder="Enter Room Password"></div>
+    </div>
+    <button class="btn" style="margin-top:6px" onclick="saveTour()"><i class="fas fa-save"></i> SAVE TOURNAMENT</button>
+    <button class="btn outline" style="margin-top:8px" onclick="closeM('m-tour')">Cancel</button>
+  </div>
+</div>
+
+<!-- EDIT USER WALLET -->
+<div class="mov" id="m-user" onclick="if(event.target===this)closeM('m-user')">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mt">👤 Edit User</div>
+    <div style="font-weight:700;margin-bottom:12px;color:var(--pu5)" id="m-user-name">Username</div>
+    <label style="font-size:11px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">Wallet Balance (₹)</label>
+    <input class="mi" type="number" id="u-wallet" placeholder="0">
+    <label style="font-size:11px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">Kills</label>
+    <input class="mi" type="number" id="u-kills" placeholder="0">
+    <label style="font-size:11px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">Matches</label>
+    <input class="mi" type="number" id="u-matches" placeholder="0">
+    <label style="font-size:11px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">Wins</label>
+    <input class="mi" type="number" id="u-wins" placeholder="0">
+    <button class="btn" onclick="saveUser()"><i class="fas fa-save"></i> SAVE CHANGES</button>
+    <button class="btn red" style="margin-top:9px" onclick="deleteUser()"><i class="fas fa-trash"></i> DELETE USER</button>
+    <button class="btn outline" style="margin-top:9px" onclick="closeM('m-user')">Cancel</button>
+  </div>
+</div>
+
+<!-- SET WINNER -->
+<div class="mov" id="m-winner" onclick="if(event.target===this)closeM('m-winner')">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mt">🏆 Set Tournament Winner</div>
+    <div style="font-weight:700;margin-bottom:12px;color:var(--pu5)" id="m-win-tour">Tournament</div>
+    <label style="font-size:11px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">Select Winner</label>
+    <select class="mi" id="win-user-select"><option value="">-- Select Player --</option></select>
+    <label style="font-size:11px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">Prize Amount (₹)</label>
+    <input class="mi" type="number" id="win-prize" placeholder="Prize amount to add to wallet">
+    <button class="btn" style="margin-top:4px" onclick="saveWinner()"><i class="fas fa-trophy"></i> SET WINNER & ADD PRIZE</button>
+    <button class="btn outline" style="margin-top:9px" onclick="closeM('m-winner')">Cancel</button>
+  </div>
+</div>
+
+<!-- DEPOSIT DETAIL -->
+<div class="mov" id="m-dep-detail" onclick="if(event.target===this)closeM('m-dep-detail')">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mt">💵 Deposit Request</div>
+    <div id="dep-detail-body" style="margin-bottom:16px"></div>
+    <button class="btn green" onclick="actDep('approved')"><i class="fas fa-check"></i> APPROVE & ADD MONEY</button>
+    <button class="btn red" style="margin-top:9px" onclick="actDep('rejected')"><i class="fas fa-times"></i> REJECT REQUEST</button>
+    <button class="btn outline" style="margin-top:9px" onclick="closeM('m-dep-detail')">Cancel</button>
+  </div>
+</div>
+
+<!-- WITHDRAWAL DETAIL -->
+<div class="mov" id="m-wdr-detail" onclick="if(event.target===this)closeM('m-wdr-detail')">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mt">💸 Withdrawal Request</div>
+    <div id="wdr-detail-body" style="margin-bottom:16px"></div>
+    <button class="btn green" onclick="actWdr('approved')"><i class="fas fa-check"></i> MARK PAID (Approve)</button>
+    <button class="btn red" style="margin-top:9px" onclick="actWdr('rejected')"><i class="fas fa-times"></i> REJECT & REFUND</button>
+    <button class="btn outline" style="margin-top:9px" onclick="closeM('m-wdr-detail')">Cancel</button>
+  </div>
+</div>
+
+<div id="toast-el" class="toast"></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,set,get,onValue,update,remove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const FC={
+  apiKey:"AIzaSyBdfkZSHHkO1pWQAbCe31_mAZcfd0aFa7w",
+  authDomain:"aditya-code-c67a3.firebaseapp.com",
+  databaseURL:"https://aditya-code-c67a3-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"aditya-code-c67a3",
+  storageBucket:"aditya-code-c67a3.firebasestorage.app",
+  messagingSenderId:"801333468026",
+  appId:"1:801333468026:web:20a164b521d7224a7794c3"
+};
+const app=initializeApp(FC);
+const db=getDatabase(app);
+window._db=db;window._ref=ref;window._set=set;window._get=get;window._update=update;window._remove=remove;
+
+// State
+window._AD={};window._aU=[];window._tours=[];window._deps=[];window._wdrs=[];window._notifs=[];
+window._depFilter='all';window._wdrFilter='all';window._editTourId=null;window._editUserId=null;
+window._depId=null;window._wdrId=null;window._winTourId=null;
+
+// Realtime listeners
+onValue(ref(db,'admin'),s=>{
+  if(s.exists()){
+    window._AD=s.val();
+    if(document.getElementById('pg-settings').style.display!=='none')loadSettings();
+    // Update header
+    const ad=window._AD;
+    const hn=el('hdr-adm-name');if(hn)hn.textContent=ad.displayName||ad.username||'Admin';
+    if(window._AD_logged)renderAdmAv(ad.photo||'');
+  }
+});
+onValue(ref(db,'users'),s=>{
+  window._aU=s.exists()?Object.values(s.val()):[];
+  renderUsers();updateDash();
+});
+onValue(ref(db,'tournaments'),s=>{
+  window._tours=s.exists()?Object.values(s.val()).sort((a,b)=>b.id-a.id):[];
+  renderTours();updateDash();
+});
+onValue(ref(db,'deposits'),s=>{
+  window._deps=s.exists()?Object.values(s.val()).sort((a,b)=>b.id-a.id):[];
+  renderDeps();updateDash();updateBadges();
+});
+onValue(ref(db,'withdrawals'),s=>{
+  window._wdrs=s.exists()?Object.values(s.val()).sort((a,b)=>b.id-a.id):[];
+  renderWdrs();updateDash();updateBadges();
+});
+onValue(ref(db,'notifications'),s=>{
+  window._notifs=s.exists()?Object.values(s.val()).sort((a,b)=>b.id-a.id):[];
+  renderNotifHistory();
+});
+
+// INIT
+async function init(){
+  try{
+    const as=await get(ref(db,'admin'));
+    if(!as.exists()){
+      await set(ref(db,'admin'),{username:'admin',password:'admin123',upi:'',qr:'',tc:'',tcImg:'',whatsapp:'',telegram:''});
+    }
+    document.getElementById('loader').style.display='none';
+    const saved=sessionStorage.getItem('AT_ADMIN');
+    if(saved){window._AD_logged=JSON.parse(saved);showMain();}
+    else{document.getElementById('login-pg').style.display='flex';}
+  }catch(e){
+    document.getElementById('loader').style.display='none';
+    document.getElementById('login-pg').style.display='flex';
+    toast('Firebase connection error: '+e.message,'err');
+  }
+}
+
+// LOGIN
+window.doAdminLogin=async function(){
+  const u=gv('a-user'),p=gv('a-pass');
+  if(!u||!p){showLoginMsg('Fill all fields','err');return;}
+  try{
+    const s=await get(ref(db,'admin'));
+    const ad=s.exists()?s.val():{};
+    if(u===ad.username&&p===ad.password){
+      window._AD=ad;window._AD_logged={u};
+      sessionStorage.setItem('AT_ADMIN',JSON.stringify({u}));
+      document.getElementById('login-pg').style.display='none';
+      showMain();
+    } else {showLoginMsg('Invalid username or password','err');}
+  }catch(e){showLoginMsg('Error: '+e.message,'err');}
+}
+
+function showLoginMsg(m,t){
+  document.getElementById('login-msg').innerHTML=`<div class="amsg ${t}">${m}</div>`;
+  setTimeout(()=>document.getElementById('login-msg').innerHTML='',3000);
+}
+window.doAdminLogout=function(){
+  sessionStorage.removeItem('AT_ADMIN');
+  document.getElementById('main-pg').style.display='none';
+  document.getElementById('login-pg').style.display='flex';
+}
+function showMain(){
+  document.getElementById('main-pg').style.display='flex';
+  const ad=window._AD||{};
+  const hn=el('hdr-adm-name');if(hn)hn.textContent=ad.displayName||ad.username||'Admin';
+  renderAdmAv(ad.photo||'');
+  showTab('dashboard');
+}
+
+// TABS
+window.showTab=function(t){
+  ['dashboard','tournaments','deposits','withdrawals','users','settings','notifications'].forEach(pg=>{
+    document.getElementById('pg-'+pg).style.display=(pg===t?'block':'none');
+    document.getElementById('tab-'+pg).classList.toggle('on',pg===t);
+  });
+  if(t==='settings')loadSettings();
+}
+
+// DASHBOARD UPDATE
+function updateDash(){
+  const users=window._aU||[];
+  const tours=window._tours||[];
+  const deps=window._deps||[];
+  const wdrs=window._wdrs||[];
+  const pendDeps=deps.filter(d=>d.status==='pending');
+  const pendWdrs=wdrs.filter(w=>w.status==='pending');
+  const totalWallet=users.reduce((s,u)=>s+(u.wallet||0),0);
+  const live=tours.filter(t=>t.status==='live');
+  if(el('s-users'))el('s-users').textContent=users.length;
+  if(el('s-tours'))el('s-tours').textContent=tours.length;
+  if(el('s-pending-dep'))el('s-pending-dep').textContent=pendDeps.length;
+  if(el('s-pending-wdr'))el('s-pending-wdr').textContent=pendWdrs.length;
+  if(el('s-wallet'))el('s-wallet').textContent='₹'+totalWallet;
+  if(el('s-live'))el('s-live').textContent=live.length;
+  if(el('qa-dep-s'))el('qa-dep-s').textContent=pendDeps.length+' pending requests';
+  if(el('qa-wdr-s'))el('qa-wdr-s').textContent=pendWdrs.length+' pending requests';
+  renderRecentActivity();
+}
+
+function updateBadges(){
+  const pendDeps=(window._deps||[]).filter(d=>d.status==='pending').length;
+  const pendWdrs=(window._wdrs||[]).filter(w=>w.status==='pending').length;
+  const dc=el('dep-cnt');if(dc){dc.style.display=pendDeps>0?'inline':'none';dc.textContent=pendDeps;}
+  const wc=el('wdr-cnt');if(wc){wc.style.display=pendWdrs>0?'inline':'none';wc.textContent=pendWdrs;}
+}
+
+function renderRecentActivity(){
+  const deps=(window._deps||[]).slice(0,5);
+  const wdrs=(window._wdrs||[]).slice(0,5);
+  const all=[...deps.map(d=>({...d,_type:'dep'})),...wdrs.map(w=>({...w,_type:'wdr'}))].sort((a,b)=>b.id-a.id).slice(0,8);
+  const ra=el('recent-activity');
+  if(!ra)return;
+  if(!all.length){ra.innerHTML='<div class="empty"><i class="fas fa-clock"></i><p>No activity yet</p></div>';return;}
+  ra.innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>Type</th><th>User</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody>${all.map(r=>`<tr>
+      <td>${r._type==='dep'?'💵 Deposit':'💸 Withdrawal'}</td>
+      <td>${r.username||'User#'+r.userId}</td>
+      <td style="font-weight:800;color:${r._type==='dep'?'var(--green)':'var(--red)'}">₹${r.amount}</td>
+      <td><span class="badge ${r.status}">${r.status}</span></td>
+      <td style="font-size:11px;color:var(--text3)">${r.date||'-'}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+// TOURNAMENTS
+function renderTours(search=''){
+  const tours=(window._tours||[]).filter(t=>!search||t.title.toLowerCase().includes(search.toLowerCase())||t.game.toLowerCase().includes(search.toLowerCase()));
+  const container=el('tours-list');if(!container)return;
+  if(!tours.length){container.innerHTML='<div class="empty"><i class="fas fa-trophy"></i><p>No tournaments yet. Add one!</p></div>';return;}
+  container.innerHTML=tours.map(t=>{
+    const parts=t.participants?Object.keys(t.participants).length:0;
+    return`<div class="sec" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700">${t.title}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px">${t.game} • ${t.map||'No map'}</div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <span class="badge ${t.status}">${t.status.toUpperCase()}</span>
+            <span style="font-size:11px;color:var(--gold);font-weight:700">💰 ₹${t.prize||0} Prize</span>
+            <span style="font-size:11px;color:var(--pu5);font-weight:700">🎮 ₹${t.fee||0} Fee</span>
+            <span style="font-size:11px;color:var(--green);font-weight:700">👥 ${parts}/${t.maxPlayers||40}</span>
+          </div>
+          ${t.roomId?`<div style="margin-top:8px;font-size:11px;font-weight:700;color:var(--cyan)">🔑 Room: ${t.roomId} | Pass: ${t.roomPass||'-'}</div>`:''}
+        </div>
+        <div class="act-btns" style="flex-wrap:wrap">
+          <button class="ibtn pu" onclick="openEditTour('${t.id}')"><i class="fas fa-pen"></i> Edit</button>
+          <button class="ibtn or" onclick="openWinner('${t.id}')"><i class="fas fa-trophy"></i> Winner</button>
+          <button class="ibtn no" onclick="deleteTour('${t.id}')"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+window.filterTours=function(v){renderTours(v);}
+
+window.openAddTour=function(){
+  window._editTourId=null;
+  el('m-tour-title').textContent='🏆 Add Tournament';
+  ['t-title','t-map','t-room','t-rpass','t-thumb'].forEach(id=>{const e=el(id);if(e)e.value='';});
+  ['t-fee','t-prize','t-kill','t-maxp'].forEach(id=>{const e=el(id);if(e)e.value='';});
+  el('t-status').value='upcoming';el('t-game').value='Free Fire';el('t-time').value='';
+  openM('m-tour');
+}
+window.openEditTour=function(id){
+  const t=(window._tours||[]).find(x=>String(x.id)===String(id));if(!t)return;
+  window._editTourId=id;
+  el('m-tour-title').textContent='✏️ Edit Tournament';
+  el('t-title').value=t.title||'';el('t-game').value=t.game||'Free Fire';
+  el('t-status').value=t.status||'upcoming';el('t-fee').value=t.fee||0;
+  el('t-prize').value=t.prize||0;el('t-kill').value=t.perKill||0;
+  el('t-maxp').value=t.maxPlayers||40;el('t-map').value=t.map||'';
+  el('t-time').value=t.time?new Date(t.time).toISOString().slice(0,16):'';
+  el('t-thumb').value=t.thumbnail||'';
+  el('t-room').value=t.roomId||'';el('t-rpass').value=t.roomPass||'';
+  openM('m-tour');
+}
+window.saveTour=async function(){
+  const title=el('t-title').value.trim();if(!title){toast('Enter tournament title','err');return;}
+  const data={
+    title,game:el('t-game').value,status:el('t-status').value,
+    fee:parseInt(el('t-fee').value)||0,prize:parseInt(el('t-prize').value)||0,
+    perKill:parseInt(el('t-kill').value)||0,maxPlayers:parseInt(el('t-maxp').value)||40,
+    map:el('t-map').value.trim(),time:el('t-time').value?new Date(el('t-time').value).getTime():null,
+    thumbnail:el('t-thumb').value.trim(),roomId:el('t-room').value.trim(),roomPass:el('t-rpass').value.trim()
+  };
+  try{
+    if(window._editTourId){
+      await update(ref(db,'tournaments/'+window._editTourId),data);toast('Tournament updated!','ok');
+    } else {
+      const s=await get(ref(db,'meta/nextTourId'));
+      const id=s.exists()?s.val():1;
+      await set(ref(db,'tournaments/'+id),{...data,id,participants:{}});
+      await set(ref(db,'meta/nextTourId'),id+1);
+      toast('Tournament added!','ok');
+    }
+    closeM('m-tour');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+window.deleteTour=async function(id){
+  if(!confirm('Delete this tournament?'))return;
+  await remove(ref(db,'tournaments/'+id));toast('Tournament deleted','ok');
+}
+
+// WINNER
+window.openWinner=function(id){
+  const t=(window._tours||[]).find(x=>String(x.id)===String(id));if(!t)return;
+  window._winTourId=id;
+  el('m-win-tour').textContent=t.title;
+  el('win-prize').value=t.prize||0;
+  const parts=t.participants?Object.keys(t.participants):[]; 
+  const users=window._aU||[];
+  const opts=parts.map(uid=>{const u=users.find(x=>String(x.id)===String(uid));return`<option value="${uid}">${u?u.username:'User#'+uid}</option>`;}).join('');
+  el('win-user-select').innerHTML='<option value="">-- Select Player --</option>'+opts;
+  openM('m-winner');
+}
+window.saveWinner=async function(){
+  const uid=el('win-user-select').value;
+  const prize=parseInt(el('win-prize').value)||0;
+  if(!uid){toast('Select a winner','err');return;}
+  if(!window._winTourId){return;}
+  try{
+    const u=window._aU.find(x=>String(x.id)===String(uid));
+    if(!u){toast('User not found','err');return;}
+    const newW=(u.wallet||0)+prize;
+    await update(ref(db,'users/'+uid),{wallet:newW,wins:(u.wins||0)+1});
+    await update(ref(db,'tournaments/'+window._winTourId),{status:'completed',winner:uid});
+    // Add notification
+    const s=await get(ref(db,'meta/nextNotifId'));const nid=s.exists()?s.val():1;
+    const tour=window._tours.find(t=>String(t.id)===String(window._winTourId));
+    await set(ref(db,'notifications/'+nid),{id:nid,userId:Number(uid),title:'🏆 You Won!',msg:'Congratulations! You won '+(tour?tour.title:'tournament')+'. ₹'+prize+' added to wallet!',read:false,time:now()});
+    await set(ref(db,'meta/nextNotifId'),nid+1);
+    // Transaction
+    const s2=await get(ref(db,'meta/nextTxId'));const tid=s2.exists()?s2.val():1;
+    await set(ref(db,'transactions/'+tid),{id:tid,userId:Number(uid),amount:prize,type:'cr',desc:'🏆 Prize Won: '+(tour?tour.title:'Tournament'),date:now()});
+    await set(ref(db,'meta/nextTxId'),tid+1);
+    closeM('m-winner');
+    toast('🏆 Winner set & ₹'+prize+' added!','ok');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+
+// DEPOSITS
+function renderDeps(){
+  const f=window._depFilter||'all';
+  const deps=(window._deps||[]).filter(d=>f==='all'||d.status===f);
+  const tbody=el('dep-tbody');if(!tbody)return;
+  if(!deps.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><i class="fas fa-money-bill"></i><p>No deposit requests</p></div></td></tr>`;return;}
+  tbody.innerHTML=deps.map(d=>`<tr>
+    <td style="font-weight:700;color:var(--text3)">#${d.id}</td>
+    <td style="font-weight:700">${d.username||'User#'+d.userId}</td>
+    <td style="font-weight:800;color:var(--green)">₹${d.amount}</td>
+    <td style="font-size:11px;font-family:monospace;color:var(--cyan)">${d.txnId||'-'}</td>
+    <td style="font-size:11px;color:var(--text3)">${d.date||'-'}</td>
+    <td><span class="badge ${d.status}">${d.status}</span></td>
+    <td><div class="act-btns">
+      ${d.status==='pending'?`<button class="ibtn ok" onclick="openDepDetail('${d.id}')"><i class="fas fa-eye"></i> Review</button>`:''}
+      <button class="ibtn no" onclick="confirmDeleteDep('${d.id}')"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('');
+}
+window.filterDeps=function(f){
+  window._depFilter=f;
+  ['all','pending','approved','rejected'].forEach(x=>el('df-'+x)?.style.removeProperty('border-color'));
+  el('df-'+f).style.borderColor='var(--pu4)';
+  renderDeps();
+}
+window.openDepDetail=function(id){
+  const d=(window._deps||[]).find(x=>String(x.id)===String(id));if(!d)return;
+  window._depId=id;
+  el('dep-detail-body').innerHTML=`
+    <div style="background:rgba(139,92,246,.07);border:1px solid var(--border);border-radius:14px;padding:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text3);font-size:12px">User</span><span style="font-weight:800">${d.username||'User#'+d.userId}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text3);font-size:12px">Amount</span><span style="font-weight:800;color:var(--green);font-size:18px">₹${d.amount}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text3);font-size:12px">Transaction ID</span><span style="font-weight:700;color:var(--cyan);font-size:12px">${d.txnId||'-'}</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text3);font-size:12px">Date</span><span style="font-size:11px">${d.date||'-'}</span></div>
+    </div>`;
+  openM('m-dep-detail');
+}
+window.actDep=async function(action){
+  const d=(window._deps||[]).find(x=>String(x.id)===String(window._depId));if(!d)return;
+  try{
+    await update(ref(db,'deposits/'+d.id),{status:action});
+    if(action==='approved'){
+      const u=window._aU.find(x=>String(x.id)===String(d.userId));
+      if(u){
+        await update(ref(db,'users/'+d.userId),{wallet:(u.wallet||0)+d.amount});
+        // Transaction record
+        const s=await get(ref(db,'meta/nextTxId'));const tid=s.exists()?s.val():1;
+        await set(ref(db,'transactions/'+tid),{id:tid,userId:Number(d.userId),amount:d.amount,type:'cr',desc:'💵 Deposit Approved',date:now()});
+        await set(ref(db,'meta/nextTxId'),tid+1);
+        // Notification
+        const sn=await get(ref(db,'meta/nextNotifId'));const nid=sn.exists()?sn.val():1;
+        await set(ref(db,'notifications/'+nid),{id:nid,userId:Number(d.userId),title:'💵 Deposit Approved!',msg:'₹'+d.amount+' has been added to your wallet.',read:false,time:now()});
+        await set(ref(db,'meta/nextNotifId'),nid+1);
+        toast('✅ Approved & ₹'+d.amount+' added to wallet!','ok');
+      }
+    } else {
+      toast('❌ Deposit rejected','ok');
+    }
+    closeM('m-dep-detail');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+window.confirmDeleteDep=async function(id){
+  if(!confirm('Delete this deposit record?'))return;
+  await remove(ref(db,'deposits/'+id));toast('Record deleted','ok');
+}
+
+// WITHDRAWALS
+function renderWdrs(){
+  const f=window._wdrFilter||'all';
+  const wdrs=(window._wdrs||[]).filter(w=>f==='all'||w.status===f);
+  const tbody=el('wdr-tbody');if(!tbody)return;
+  if(!wdrs.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><i class="fas fa-wallet"></i><p>No withdrawal requests</p></div></td></tr>`;return;}
+  tbody.innerHTML=wdrs.map(w=>`<tr>
+    <td style="font-weight:700;color:var(--text3)">#${w.id}</td>
+    <td style="font-weight:700">${w.username||'User#'+w.userId}</td>
+    <td style="font-weight:800;color:var(--red)">₹${w.amount}</td>
+    <td style="font-size:11px;color:var(--cyan)">${w.upi||'-'}</td>
+    <td style="font-size:11px;color:var(--text3)">${w.date||'-'}</td>
+    <td><span class="badge ${w.status}">${w.status}</span></td>
+    <td><div class="act-btns">
+      ${w.status==='pending'?`<button class="ibtn ok" onclick="openWdrDetail('${w.id}')"><i class="fas fa-eye"></i> Review</button>`:''}
+      <button class="ibtn no" onclick="confirmDeleteWdr('${w.id}')"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('');
+}
+window.filterWdrs=function(f){
+  window._wdrFilter=f;
+  ['all','pending','approved','rejected'].forEach(x=>el('wf-'+x)?.style.removeProperty('border-color'));
+  el('wf-'+f).style.borderColor='var(--pu4)';
+  renderWdrs();
+}
+window.openWdrDetail=function(id){
+  const w=(window._wdrs||[]).find(x=>String(x.id)===String(id));if(!w)return;
+  window._wdrId=id;
+  el('wdr-detail-body').innerHTML=`
+    <div style="background:rgba(139,92,246,.07);border:1px solid var(--border);border-radius:14px;padding:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text3);font-size:12px">User</span><span style="font-weight:800">${w.username||'User#'+w.userId}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text3);font-size:12px">Amount</span><span style="font-weight:800;color:var(--red);font-size:18px">₹${w.amount}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--text3);font-size:12px">UPI ID</span><span style="font-weight:700;color:var(--cyan)">${w.upi||'-'}</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text3);font-size:12px">Date</span><span style="font-size:11px">${w.date||'-'}</span></div>
+    </div>
+    <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:10px 14px;margin-top:12px;font-size:12px;font-weight:600;color:var(--gold)">
+      ⚠️ Approve only after sending money to UPI above. Rejected = money refunded to user wallet.
+    </div>`;
+  openM('m-wdr-detail');
+}
+window.actWdr=async function(action){
+  const w=(window._wdrs||[]).find(x=>String(x.id)===String(window._wdrId));if(!w)return;
+  try{
+    await update(ref(db,'withdrawals/'+w.id),{status:action});
+    const sn=await get(ref(db,'meta/nextNotifId'));const nid=sn.exists()?sn.val():1;
+    if(action==='approved'){
+      await set(ref(db,'notifications/'+nid),{id:nid,userId:Number(w.userId),title:'💸 Withdrawal Processed!',msg:'₹'+w.amount+' has been sent to '+w.upi+'. Check your UPI app.',read:false,time:now()});
+      toast('✅ Marked as paid!','ok');
+    } else {
+      // Refund
+      const u=window._aU.find(x=>String(x.id)===String(w.userId));
+      if(u) await update(ref(db,'users/'+w.userId),{wallet:(u.wallet||0)+w.amount});
+      await set(ref(db,'notifications/'+nid),{id:nid,userId:Number(w.userId),title:'❌ Withdrawal Rejected',msg:'₹'+w.amount+' withdrawal was rejected. Amount refunded to wallet.',read:false,time:now()});
+      toast('Rejected & refunded ₹'+w.amount,'ok');
+    }
+    await set(ref(db,'meta/nextNotifId'),nid+1);
+    closeM('m-wdr-detail');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+window.confirmDeleteWdr=async function(id){
+  if(!confirm('Delete this withdrawal record?'))return;
+  await remove(ref(db,'withdrawals/'+id));toast('Record deleted','ok');
+}
+
+// USERS
+function renderUsers(search=''){
+  const q=(search||el('user-search')?.value||'').toLowerCase();
+  const users=(window._aU||[]).filter(u=>!q||u.username?.toLowerCase().includes(q)||u.email?.toLowerCase().includes(q));
+  const tbody=el('users-tbody');if(!tbody)return;
+  if(!users.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty"><i class="fas fa-users"></i><p>No users found</p></div></td></tr>`;return;}
+  tbody.innerHTML=users.sort((a,b)=>a.id-b.id).map(u=>`<tr>
+    <td style="font-weight:700;color:var(--text3)">${u.id}</td>
+    <td><div style="display:flex;align-items:center;gap:8px">
+      <div class="u-av">${u.avatar?`<img src="${u.avatar}" onerror="this.parentElement.innerHTML='🎮'">`:'🎮'}</div>
+      <div><div style="font-weight:800;font-size:13px">${u.username}</div><div style="font-size:10px;color:var(--pu5)">${u.refCode||''}</div></div>
+    </div></td>
+    <td style="font-size:11px;color:var(--text3)">${u.email||'-'}</td>
+    <td style="font-weight:800;color:var(--green)">₹${u.wallet||0}</td>
+    <td style="color:var(--red)">${u.kills||0}</td>
+    <td>${u.matches||0}</td>
+    <td style="color:var(--gold)">${u.wins||0}</td>
+    <td><button class="ibtn pu" onclick="openEditUser('${u.id}')"><i class="fas fa-pen"></i> Edit</button></td>
+  </tr>`).join('');
+}
+window.filterUsers=function(v){renderUsers(v);}
+
+window.openEditUser=function(id){
+  const u=(window._aU||[]).find(x=>String(x.id)===String(id));if(!u)return;
+  window._editUserId=id;
+  el('m-user-name').textContent='👤 '+u.username+' ('+u.email+')';
+  el('u-wallet').value=u.wallet||0;
+  el('u-kills').value=u.kills||0;
+  el('u-matches').value=u.matches||0;
+  el('u-wins').value=u.wins||0;
+  openM('m-user');
+}
+window.saveUser=async function(){
+  if(!window._editUserId)return;
+  const wallet=parseInt(el('u-wallet').value)||0;
+  const kills=parseInt(el('u-kills').value)||0;
+  const matches=parseInt(el('u-matches').value)||0;
+  const wins=parseInt(el('u-wins').value)||0;
+  try{
+    await update(ref(db,'users/'+window._editUserId),{wallet,kills,matches,wins});
+    closeM('m-user');toast('User updated!','ok');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+window.deleteUser=async function(){
+  if(!window._editUserId)return;
+  if(!confirm('Permanently delete this user?'))return;
+  await remove(ref(db,'users/'+window._editUserId));
+  closeM('m-user');toast('User deleted','ok');
+}
+
+// SETTINGS
+function loadSettings(){
+  const ad=window._AD||{};
+  if(el('st-auser'))el('st-auser').value=ad.username||'';
+  if(el('st-apass'))el('st-apass').value=ad.password||'';
+  if(el('st-adname'))el('st-adname').value=ad.displayName||'';
+  if(el('st-adphoto'))el('st-adphoto').value=ad.photo||'';
+  if(el('st-upi'))el('st-upi').value=ad.upi||'';
+  if(el('st-qr'))el('st-qr').value=ad.qr||'';
+  if(el('st-wa'))el('st-wa').value=ad.whatsapp||'';
+  if(el('st-tg'))el('st-tg').value=ad.telegram||'';
+  if(el('st-tc'))el('st-tc').value=ad.tc||'';
+  if(el('st-tcimg'))el('st-tcimg').value=ad.tcImg||'';
+  // Render admin avatar
+  renderAdmAv(ad.photo||'');
+  // Render QR preview
+  previewQR(ad.qr||'');
+}
+
+// ADMIN AVATAR
+function renderAdmAv(src){
+  const w=el('adm-av-wrap');if(!w)return;
+  if(src){w.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🛡️'">`;}
+  else{w.innerHTML='🛡️';}
+  // Also update header if exists
+  const hav=el('hdr-adm-av');if(hav){hav.innerHTML=src?`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.innerHTML='🛡️'">`:'🛡️';}
+}
+window.previewAdmAv=function(url){renderAdmAv(url);}
+window.handleAdmAvatar=function(ev){
+  const f=ev.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const b64=e.target.result;
+    if(el('st-adphoto'))el('st-adphoto').value=b64;
+    renderAdmAv(b64);
+    toast('Photo selected! Save karna na bhoolein.','ok');
+  };
+  reader.readAsDataURL(f);
+  ev.target.value='';
+}
+window.clearAdmAvatar=function(){
+  renderAdmAv('');
+  if(el('st-adphoto'))el('st-adphoto').value='';
+}
+
+// QR UPLOAD FROM GALLERY
+window.handleQRUpload=function(ev){
+  const f=ev.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const b64=e.target.result;
+    if(el('st-qr'))el('st-qr').value=b64;
+    previewQR(b64);
+    toast('QR selected! Save karna na bhoolein.','ok');
+  };
+  reader.readAsDataURL(f);
+  ev.target.value='';
+}
+window.previewQR=function(src){
+  const box=el('qr-preview-box');if(!box)return;
+  if(src){box.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-qrcode\\' style=\\'font-size:50px;color:#ccc\\'></i>'">`;}
+  else{box.innerHTML='<i class="fas fa-qrcode" style="font-size:50px;color:#ccc"></i>';}
+}
+
+window.saveAdminProfile=async function(){
+  const u=el('st-auser').value.trim(),p=el('st-apass').value.trim();
+  if(!u||!p){toast('Username & password zaroori hai','err');return;}
+  const data={username:u,password:p,displayName:el('st-adname').value.trim(),photo:el('st-adphoto').value.trim()};
+  await update(ref(db,'admin'),data);
+  // Update header display name
+  const hn=el('hdr-adm-name');if(hn)hn.textContent=data.displayName||u;
+  renderAdmAv(data.photo);
+  toast('✅ Admin profile saved!','ok');
+}
+window.savePayment=async function(){
+  await update(ref(db,'admin'),{upi:el('st-upi').value.trim(),qr:el('st-qr').value.trim()});toast('Payment info saved!','ok');
+}
+window.saveContact=async function(){
+  await update(ref(db,'admin'),{whatsapp:el('st-wa').value.trim(),telegram:el('st-tg').value.trim()});toast('Contact info saved!','ok');
+}
+window.saveTC=async function(){
+  await update(ref(db,'admin'),{tc:el('st-tc').value,tcImg:el('st-tcimg').value.trim()});toast('T&C saved!','ok');
+}
+
+// BROADCAST NOTIFICATIONS
+window.sendBroadcast=async function(){
+  const title=el('notif-title').value.trim();
+  const msg=el('notif-msg').value.trim();
+  if(!title||!msg){toast('Fill title & message','err');return;}
+  const users=window._aU||[];
+  if(!users.length){toast('No users to send to','err');return;}
+  try{
+    const s=await get(ref(db,'meta/nextNotifId'));
+    let nid=s.exists()?s.val():1;
+    for(const u of users){
+      await set(ref(db,'notifications/'+nid),{id:nid,userId:u.id,title,msg,read:false,time:now()});
+      nid++;
+    }
+    await set(ref(db,'meta/nextNotifId'),nid);
+    el('notif-title').value='';el('notif-msg').value='';
+    toast('📢 Sent to '+users.length+' users!','ok');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+function renderNotifHistory(){
+  const all=(window._notifs||[]).slice(0,20);
+  const el2=el('notif-history');if(!el2)return;
+  if(!all.length){el2.innerHTML='<div class="empty"><i class="fas fa-bell-slash"></i><p>No notifications sent</p></div>';return;}
+  // Show unique broadcasts (group by title+time prefix)
+  el2.innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>Title</th><th>Message</th><th>Sent To</th><th>Time</th></tr></thead>
+    <tbody>${all.map(n=>`<tr>
+      <td style="font-weight:700">${n.title}</td>
+      <td style="font-size:12px;color:var(--text3)">${n.msg}</td>
+      <td style="font-size:11px;color:var(--pu5)">User #${n.userId}</td>
+      <td style="font-size:10px;color:var(--text3)">${n.time||'-'}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+// UTILS
+function el(id){return document.getElementById(id);}
+function gv(id){return document.getElementById(id)?.value.trim()||'';}
+function now(){return new Date().toLocaleString('en-IN');}
+window.openM=function(id){el(id)?.classList.add('open');}
+window.closeM=function(id){el(id)?.classList.remove('open');}
+window.toast=function(msg,t='ok'){
+  const te=el('toast-el');if(!te)return;
+  te.textContent=msg;te.className='toast show '+(t||'ok');
+  clearTimeout(window._toastT);
+  window._toastT=setTimeout(()=>te.classList.remove('show'),3000);
+}
+
+init();
+</script>
+
+</body>
+</html>
